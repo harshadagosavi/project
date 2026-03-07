@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glassmorphism Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
+
+    body {
+      background: #d8ecff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    .wrapper {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .calculator {
+      width: 260px;
+      padding: 20px;
+      border-radius: 25px;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .calculator.dark {
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+    }
+
+    .display {
+      width: 100%;
+      padding: 15px;
+      font-size: 25px;
+      text-align: right;
+      border: none;
+      outline: none;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .calculator.dark .display {
+      background: rgba(0, 0, 0, 0.4);
+      color: white;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      padding: 15px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .calculator.dark button {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .calculator.dark button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    button.equal {
+      background: #4da6ff;
+      color: white;
+      height: 150%;
+      width: 100%;
+    }
+
+    button.equal:hover {
+      background: #1a8cff;
+    }
+
+    /* Oval background behind calculators */
+    .oval {
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      filter: blur(6px);
+      background: radial-gradient(circle at center, #5ab2ff 0%, #3a9dff 40%, #1f7dff 70%, #0e5ed6 100%);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="oval"></div>
+
+  <div class="wrapper">
+    <!-- Light Glass Calculator -->
+    <div class="calculator" id="calc1">
+      <input type="text" class="display" id="display1" disabled />
+      <div class="buttons">
+        <button onclick="clearDisplay('display1')">AC</button>
+         <button onclick="clearAll()">⌫</button>
+        <button onclick="appendValue('display1', ')')">)</button>
+        <button onclick="appendValue('display1', '/')">/</button>
+
+        <button onclick="appendValue('display1', '7')">7</button>
+        <button onclick="appendValue('display1', '8')">8</button>
+        <button onclick="appendValue('display1', '9')">9</button>
+        <button onclick="appendValue('display1', '*')">×</button>
+
+        <button onclick="appendValue('display1', '4')">4</button>
+        <button onclick="appendValue('display1', '5')">5</button>
+        <button onclick="appendValue('display1', '6')">6</button>
+        <button onclick="appendValue('display1', '-')">-</button>
+
+        <button onclick="appendValue('display1', '1')">1</button>
+        <button onclick="appendValue('display1', '2')">2</button>
+        <button onclick="appendValue('display1', '3')">3</button>
+        <button onclick="appendValue('display1', '+')">+</button>
+
+        <button onclick="appendValue('display1', '0')" style="grid-column: span 2;">0</button>
+        <button onclick="appendValue('display1', '.')">.</button>
+        <button class="equal" onclick="calculate('display1')">=</button>
+      </div>
+    </div>
+
+    <!-- Dark Glass Calculator -->
+    <div class="calculator dark" id="calc2">
+      <input type="text" class="display" id="display2" disabled />
+      <div class="buttons">
+        <button onclick="clearDisplay('display2')">AC</button>
+        <button onclick="clearAll()">⌫</button>
+        <button onclick="appendValue('display2', ')')">)</button>
+        <button onclick="appendValue('display2', '/')">/</button>
+
+        <button onclick="appendValue('display2', '7')">7</button>
+        <button onclick="appendValue('display2', '8')">8</button>
+        <button onclick="appendValue('display2', '9')">9</button>
+        <button onclick="appendValue('display2', '*')">×</button>
+
+        <button onclick="appendValue('display2', '4')">4</button>
+        <button onclick="appendValue('display2', '5')">5</button>
+        <button onclick="appendValue('display2', '6')">6</button>
+        <button onclick="appendValue('display2', '-')">-</button>
+
+        <button onclick="appendValue('display2', '1')">1</button>
+        <button onclick="appendValue('display2', '2')">2</button>
+        <button onclick="appendValue('display2', '3')">3</button>
+        <button onclick="appendValue('display2', '+')">+</button>
+
+        <button onclick="appendValue('display2', '0')" style="grid-column: span 2;">0</button>
+        <button onclick="appendValue('display2', '.')">.</button>
+        <button class="equal" onclick="calculate('display2')">=</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function appendValue(id, value) {
+      document.getElementById(id).value += value;
+    }
+
+    function clearDisplay(id) {
+      document.getElementById(id).value = "";
+    }
+
+    function calculate(id) {
+      const display = document.getElementById(id);
+      try {
+        display.value = eval(display.value);
+      } catch (e) {
+        display.value = "Error";
+      }
+    }
+  </script>
+
+</body>
+</html>
