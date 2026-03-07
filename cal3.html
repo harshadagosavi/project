@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glassmorphism Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
+
+    body {
+      background: #d8ecff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    .wrapper {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      position: relative;
+      z-index: 1;
+    }
+
+    .calculator {
+      width: 340px;
+      padding: 25px;
+      border-radius: 25px;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .calculator.dark {
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      margin-top: 60px;
+    }
+
+    .light-calc {
+      margin-bottom: 60px;
+    }
+
+    .display {
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 28px;
+      text-align: right;
+      border: none;
+      outline: none;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.35);
+      min-height: 60px;
+    }
+
+    .calculator.dark .display {
+      background: rgba(0, 0, 0, 0.4);
+      color: white;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      padding: 0;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      transition: 0.2s;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .calculator.dark button {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .calculator.dark button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Plus button - spans rows 3 AND 4 */
+    .plus {
+      grid-column: 4;
+      grid-row: 4 / span 2 ;
+      background: rgba(100, 150, 255, 0.4);
+      color: white;
+      font-size: 22px;
+      height: auto;
+      min-height: 120px; /* 55px * 2 + 10px gap */
+    }
+
+    .plus:hover {
+      background: rgba(100, 150, 255, 0.6);
+    }
+
+    /* Equal button - spans rows 5 AND 6 */
+    .equal {
+      grid-column: 4;
+      grid-row: 5 / span 2;
+      background: #4da6ff;
+      color: white;
+      font-size: 22px;
+      height: auto;
+      min-height: 120px; 
+    }
+
+    .equal:hover {
+      background: #1a8cff;
+    }
+
+    /* Make AC button different style */
+    .clear {
+      background:  rgba(230, 229, 229, 0.4);
+      color: white;
+    }
+
+    .clear:hover {
+      background:  #1a8cff;
+    }
+
+    /* Operator buttons */
+    .operator {
+      background: #82b7ec;
+      color: rgb(255, 255, 255);
+    }
+
+    .operator:hover {
+      background: rgba(100, 150, 255, 0.6);
+    }
+
+    /* Function buttons (α, µ, sin, deg) */
+    .function {     
+      background: rgba(230, 229, 229, 0.4);
+      color: white;
+      font-size: 16px;
+    }
+
+    .function:hover {
+      background: rgba(100, 150, 255, 0.6);
+    }
+
+    /* Greek symbol buttons */
+    .greek {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    /* Zero button spans 2 columns - columns 1 AND 2 */
+    .zero {
+      grid-column: 1 / span 2;
+    }
+
+    /* Backspace button style */
+    .backspace-btn {
+      background: rgba(150, 150, 150, 0.4);
+      color: white;
+    }
+
+    .backspace-btn:hover {
+      background: rgba(150, 150, 150, 0.6);
+    }
+
+    /* Oval background behind calculators */
+    .oval {
+      position: absolute;
+      width: 800px;
+      height: 600px;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      filter: blur(6px);
+      background: radial-gradient(circle at center, #5ab2ff 0%, #3a9dff 40%, #1f7dff 70%, #0e5ed6 100%);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="oval"></div>
+
+  <div class="wrapper">
+    <!-- Light Glass Calculator - LEFT SIDE (UP) -->
+    <div class="calculator light-calc" id="calc1">
+      <input type="text" class="display" id="display1" disabled />
+      <div class="buttons">
+        <!-- Row 1: α, µ, sin, deg -->
+        <button class="function greek" onclick="appendValue('display1', 'α')">α</button>
+        <button class="function greek" onclick="appendValue('display1', 'µ')">µ</button>
+        <button class="function" onclick="calculateSin('display1')">sin</button>
+        <button class="function" onclick="toggleDegrees('display1')">deg</button>
+        
+        <!-- Row 2: AC, ⌫, /, × -->
+        <button class="clear" onclick="clearDisplay('display1')">AC</button>
+        <button class="backspace-btn" onclick="backspace('display1')">⌫</button>
+        <button class="operator" onclick="appendValue('display1', '/')">/</button>
+        <button class="operator" onclick="appendValue('display1', '*')">×</button>
+        
+        <!-- Row 3: 7, 8, 9, - -->
+        <button onclick="appendValue('display1', '7')">7</button>
+        <button onclick="appendValue('display1', '8')">8</button>
+        <button onclick="appendValue('display1', '9')">9</button>
+        <button class="operator" onclick="appendValue('display1', '-')">-</button>
+        
+        <!-- Row 4: 4, 5, 6, + (tall - spans rows 3 AND 4) -->
+        <button onclick="appendValue('display1', '4')">4</button>
+        <button onclick="appendValue('display1', '5')">5</button>
+        <button onclick="appendValue('display1', '6')">6</button>
+        <button class="plus" onclick="appendValue('display1', '+')">+</button>
+        
+        <!-- Row 5: 1, 2, 3, = (tall - spans rows 5 AND 6) -->
+        <button onclick="appendValue('display1', '1')">1</button>
+        <button onclick="appendValue('display1', '2')">2</button>
+        <button onclick="appendValue('display1', '3')">3</button>
+        <button class="equal" onclick="calculate('display1')">=</button>
+        
+        <!-- Row 6: 0 (spans columns 1-2), ., = (tall - spans rows 5 AND 6) -->
+        <button class="zero" onclick="appendValue('display1', '0')">0</button>
+        <button onclick="appendValue('display1', '.')">.</button>
+        <!-- Column 3 is empty -->
+        <!-- Column 4 has the = button (which spans rows 5-6) -->
+      </div>
+    </div>
+
+    <!-- Dark Glass Calculator - RIGHT SIDE (DOWN) -->
+    <div class="calculator dark" id="calc2">
+      <input type="text" class="display" id="display2" disabled />
+      <div class="buttons">
+        <!-- Row 1: α, µ, sin, deg -->
+        <button class="function greek" onclick="appendValue('display2', 'α')">α</button>
+        <button class="function greek" onclick="appendValue('display2', 'µ')">µ</button>
+        <button class="function" onclick="calculateSin('display2')">sin</button>
+        <button class="function" onclick="toggleDegrees('display2')">deg</button>
+        
+        <!-- Row 2: AC, ⌫, /, × -->
+        <button class="clear" onclick="clearDisplay('display2')">AC</button>
+        <button class="backspace-btn" onclick="backspace('display2')">⌫</button>
+        <button class="operator" onclick="appendValue('display2', '/')">/</button>
+        <button class="operator" onclick="appendValue('display2', '*')">×</button>
+        
+        <!-- Row 3: 7, 8, 9, - -->
+        <button onclick="appendValue('display2', '7')">7</button>
+        <button onclick="appendValue('display2', '8')">8</button>
+        <button onclick="appendValue('display2', '9')">9</button>
+        <button class="operator" onclick="appendValue('display2', '-')">-</button>
+        
+        <!-- Row 4: 4, 5, 6, + (tall - spans rows 3 AND 4) -->
+        <button onclick="appendValue('display2', '4')">4</button>
+        <button onclick="appendValue('display2', '5')">5</button>
+        <button onclick="appendValue('display2', '6')">6</button>
+        <button class="plus" onclick="appendValue('display2', '+')">+</button>
+        
+        <!-- Row 5: 1, 2, 3, = (tall - spans rows 5 AND 6) -->
+        <button onclick="appendValue('display2', '1')">1</button>
+        <button onclick="appendValue('display2', '2')">2</button>
+        <button onclick="appendValue('display2', '3')">3</button>
+        <button class="equal" onclick="calculate('display2')">=</button>
+        
+        <!-- Row 6: 0 (spans columns 1-2), ., = (tall - spans rows 5 AND 6) -->
+        <button class="zero" onclick="appendValue('display2', '0')">0</button>
+        <button onclick="appendValue('display2', '.')">.</button>
+        <!-- Column 3 is empty -->
+        <!-- Column 4 has the = button (which spans rows 5-6) -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let degreeMode = true; // true for degrees, false for radians
+    
+    function appendValue(id, value) {
+      const display = document.getElementById(id);
+      if (display.value === "0" && value !== "." && !isNaN(value) && value !== 'α' && value !== 'µ') {
+        display.value = value;
+      } else {
+        display.value += value;
+      }
+    }
+
+    function clearDisplay(id) {
+      document.getElementById(id).value = "0";
+    }
+
+    function backspace(id) {
+      const display = document.getElementById(id);
+      if (display.value.length > 1) {
+        display.value = display.value.slice(0, -1);
+      } else {
+        display.value = "0";
+      }
+    }
+
+    function calculate(id) {
+      const display = document.getElementById(id);
+      try {
+        let expression = display.value.replace(/×/g, '*');
+        display.value = eval(expression);
+      } catch (e) {
+        display.value = "Error";
+      }
+    }
+    
+    function calculateSin(id) {
+      const display = document.getElementById(id);
+      try {
+        let value = parseFloat(display.value);
+        if (degreeMode) {
+          // Convert degrees to radians
+          value = value * Math.PI / 180;
+        }
+        display.value = Math.sin(value).toFixed(6);
+      } catch (e) {
+        display.value = "Error";
+      }
+    }
+    
+    function toggleDegrees(id) {
+      degreeMode = !degreeMode;
+      const degButtons = document.querySelectorAll('.function:nth-child(4)');
+      degButtons.forEach(btn => {
+        btn.textContent = degreeMode ? "deg" : "rad";
+      });
+      const display = document.getElementById(id);
+      display.value = degreeMode ? "Degrees Mode" : "Radians Mode";
+      setTimeout(() => {
+        if (display.value === "Degrees Mode" || display.value === "Radians Mode") {
+          display.value = "0";
+        }
+      }, 1000);
+    }
+    
+    // Initialize displays with 0
+    document.getElementById('display1').value = "0";
+    document.getElementById('display2').value = "0";
+  </script>
+
+</body>
+</html>
